@@ -44,14 +44,16 @@ export function WeatherCard({
         <h3 className="text-xs font-medium text-gray-500 mb-3">
           5-DAY FORECAST
         </h3>
-        <div className="grid grid-cols-5 gap-1">
+        <div className="grid grid-cols-5 gap-2">
           {forecast.map((day, index) => (
-            <div key={index} className="flex flex-col items-center text-center px-1 py-2 rounded-md bg-gray-50">
+            <div key={index} className="flex flex-col items-center text-center">
               <span className="text-xs text-gray-400 mb-1">{day.day}</span>
-              <div className="mb-1">{day.icon}</div>
-              <div className="text-xs">
-                <span className="font-medium text-gray-900">{day.high}°</span>
-                <span className="text-gray-400 ml-1">{day.low}°</span>
+              <div className="px-1 py-2 rounded-md bg-gray-50 flex flex-col items-center">
+                <div className="mb-1">{day.icon}</div>
+                <div className="text-xs">
+                  <span className="font-medium text-gray-900">{day.high}°</span>
+                  <span className="text-gray-400 ml-1">{day.low}°</span>
+                </div>
               </div>
             </div>
           ))}
