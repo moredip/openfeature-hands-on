@@ -1,12 +1,27 @@
 import { useQuery } from "@tanstack/react-query";
 
+export type WeatherCondition = "sunny" | "cloudy" | "rainy";
+
+interface ForecastDay {
+  day: string;
+  high: number;
+  low: number;
+  condition: WeatherCondition;
+}
+
 interface WeatherData {
   city: string;
   temperatureC: number;
-  condition: string;
+  condition: WeatherCondition;
+  forecast: ForecastDay[];
 }
 
-async function fetchCurrentWeather(): Promise<WeatherData[]> {
+interface WeatherResponse {
+  locations: WeatherData[];
+  lastUpdated: string;
+}
+
+async function fetchCurrentWeather(): Promise<WeatherResponse> {
   const response = await fetch("/api/weather");
 
   if (!response.ok) {
