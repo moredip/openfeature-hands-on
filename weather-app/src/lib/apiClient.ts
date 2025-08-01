@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-export type WeatherCondition = "sunny" | "cloudy" | "rainy";
+export type WeatherCondition = "clear" | "partially_cloudy" | "cloudy" | "rainy" | "snow" | "fog" | "thunder";
 
 interface ForecastDay {
   day: string;
