@@ -19,7 +19,7 @@ export function WeatherCard({
       <h2 className="text-2xl font-medium text-gray-700">{city}</h2>
       <div className="mt-4 flex items-center">
         <span className="text-5xl font-light text-gray-900">
-          {temperature}°
+          {temperature}°C
         </span>
         <div className="ml-auto">{icon}</div>
       </div>
