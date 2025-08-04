@@ -5,6 +5,7 @@ name: openfeature-hands-on-tutorial
 
 volumes:
   pgdata:
+  flipt_data:
 
 services:
   postgres:
@@ -75,3 +76,13 @@ services:
     depends_on:
       - flagsmith
     command: run-task-processor
+
+  flipt:
+    image: docker.flipt.io/flipt/flipt:latest
+    environment:
+      FLIPT_SERVER_HTTP_PORT: 8002
+    ports:
+      - 8002:8002
+      - 9000:9000
+    volumes:
+      - flipt_data:/var/opt/flipt
