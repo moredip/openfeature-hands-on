@@ -7,6 +7,7 @@ export interface User {
   id: string;
   name: string;
   initials: string;
+  email: string;
   org: Organization;
 }
 

@@ -13,34 +13,56 @@ import {
 import { Header } from "@/components/Header";
 
 const HARDCODED_USERS: User[] = [
+  // Just The Weather, LLC employees
   {
-    id: "john-doe",
-    name: "John Doe",
-    initials: "JD",
-    org: { id: "big-co", name: "Big Co" },
+    id: "debby-developer",
+    name: "Debby Developer",
+    initials: "DD",
+    email: "debby@just-the-weather.com",
+    org: { id: "just-the-weather", name: "Just The Weather, LLC" },
   },
   {
-    id: "jane-smith",
-    name: "Jane Smith",
-    initials: "JS",
-    org: { id: "startup-inc", name: "Startup Inc" },
+    id: "sandeep-storm",
+    name: "Sandeep Storm",
+    initials: "SS",
+    email: "sandeep@just-the-weather.com",
+    org: { id: "just-the-weather", name: "Just The Weather, LLC" },
   },
+  {
+    id: "tyler-tempest",
+    name: "Tyler Tempest",
+    initials: "TT",
+    email: "tyler@just-the-weather.com",
+    org: { id: "just-the-weather", name: "Just The Weather, LLC" },
+  },
+  // Beta Co employees
+  {
+    id: "earnie-adopter",
+    name: "Earnie Adopter",
+    initials: "EA",
+    email: "earnie@beta-co.com",
+    org: { id: "beta-co", name: "Beta Co" },
+  },
+  {
+    id: "betty-tester",
+    name: "Betty Tester",
+    initials: "BT",
+    email: "betty@beta-co.com",
+    org: { id: "beta-co", name: "Beta Co" },
+  },
+  // Other companies
   {
     id: "bob-johnson",
     name: "Bob Johnson",
     initials: "BJ",
+    email: "bob.johnson@big-co.com",
     org: { id: "big-co", name: "Big Co" },
-  },
-  {
-    id: "alice-wilson",
-    name: "Alice Wilson",
-    initials: "AW",
-    org: { id: "tech-corp", name: "Tech Corp" },
   },
   {
     id: "mike-chen",
     name: "Mike Chen",
     initials: "MC",
+    email: "mike.chen@startup-inc.com",
     org: { id: "startup-inc", name: "Startup Inc" },
   },
 ];
@@ -95,14 +117,11 @@ export function LoginPage() {
                         <AvatarFallback>{user.initials}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">
+                        <p className="text-xl text-gray-900 truncate">
                           {user.name}
                         </p>
                         <p className="text-sm text-gray-500 truncate">
-                          {user.id}@{user.org.id}.com
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          Member of: {user.org.name}
+                          {user.email}
                         </p>
                       </div>
                     </div>

@@ -38,25 +38,25 @@ export function Header({ showUserDropdown = true }: HeaderProps) {
               <DropdownMenuTrigger className="hover:opacity-80 transition-opacity">
                 <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center">
                   <span className="text-gray-900 text-sm font-medium">
-                    {user?.initials || "??"}
+                    {user.initials}
                   </span>
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-40 rounded-none border-0 bg-gray-800 text-white shadow-lg"
+                className="w-64 rounded-none border-0 bg-gray-800 text-white shadow-lg"
                 sideOffset={0}
               >
-                <div className="px-3 py-2 border-b border-gray-700">
-                  <p className="text-sm font-medium">{user?.name || "Unknown"}</p>
-                  <p className="text-xs text-gray-400">{user?.org?.name || "No Organization"}</p>
+                <div className="px-3 py-2 border-b border-gray-700 text-right">
+                  <p className="text-sm font-medium">{user.name}</p>
+                  <p className="text-xs text-gray-400">{user.email}</p>
                 </div>
-                <DropdownMenuItem 
-                  className="text-red-400 hover:text-red-300 hover:bg-gray-700 focus:text-red-300 focus:bg-gray-700"
+                <DropdownMenuItem
+                  className="text-red-400 hover:text-red-300 hover:bg-gray-700 focus:text-red-300 focus:bg-gray-700 justify-end"
                   onClick={handleLogout}
                 >
-                  <LogOut className="mr-2 h-4 w-4" />
                   Sign out
+                  <LogOut className="ml-2 h-4 w-4" />
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
