@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Header } from "@/components/Header";
+import { useQueryClient } from "@tanstack/react-query";
 
 const HARDCODED_USERS: User[] = [
   // Just The Weather, LLC employees
@@ -70,6 +71,7 @@ const HARDCODED_USERS: User[] = [
 export function LoginPage() {
   const { isAuthenticated, login } = useAuth();
   const [loggingInUser, setLoggingInUser] = useState<User | null>(null);
+  const queryClient = useQueryClient();
 
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
@@ -82,6 +84,7 @@ export function LoginPage() {
     setTimeout(() => {
       try {
         login(user);
+        queryClient.clear();
       } catch (error) {
         console.error("Login failed:", error);
         setLoggingInUser(null);

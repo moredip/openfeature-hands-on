@@ -6,6 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface HeaderProps {
   showUserDropdown?: boolean;
@@ -13,10 +14,12 @@ interface HeaderProps {
 
 export function Header({ showUserDropdown = true }: HeaderProps) {
   const { user, logout } = useAuth();
+  const queryClient = useQueryClient();
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     try {
-      await logout();
+      logout();
+      queryClient.clear();
     } catch (error) {
       console.error("Logout failed:", error);
     }
