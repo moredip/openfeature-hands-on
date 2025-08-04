@@ -1,6 +1,6 @@
 import { defineEventHandler, getQuery } from "h3";
 import { OpenMeteoWeatherSource } from "../../lib/weatherSources";
-import { OpenFeature } from "@openfeature/server-sdk";
+import { useFeatureFlags } from "../..//utils/featureFlags";
 
 const openMeteoWeather = new OpenMeteoWeatherSource();
 
@@ -8,11 +8,8 @@ export default defineEventHandler(async (event) => {
   // const query = getQuery(event);
   // const includeForecast = query.includeForecast === "true";
 
-  const flags = OpenFeature.getClient();
-  const includeForecast = await flags.getBooleanValue(
-    "include-forecast",
-    false
-  );
+  const flags = useFeatureFlags(event);
+  const includeForecast = await flags.getBooleanValue("include-forecast", true);
 
   const locations = await openMeteoWeather.getWeatherForAllLocations(
     includeForecast
