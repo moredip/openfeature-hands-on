@@ -46,129 +46,67 @@ export class OpenMeteoWeatherSource {
     const weatherData: WeatherData[] = [];
 
     for (const location of HARD_CODED_WEATHER_LOCATIONS) {
-      try {
-        const params = {
-          latitude: location.latitude,
-          longitude: location.longitude,
-          current: ["temperature_2m", "weather_code"],
-          ...(includeForecast && {
-            daily: ["weather_code", "temperature_2m_max", "temperature_2m_min"],
-            forecast_days: 5,
-          }),
-          timezone: "auto",
-        };
+      const params = {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        current: ["temperature_2m", "weather_code"],
+        ...(includeForecast && {
+          daily: ["weather_code", "temperature_2m_max", "temperature_2m_min"],
+          forecast_days: 5,
+        }),
+        timezone: "auto",
+      };
 
-        const responses = await fetchWeatherApi(
-          "https://api.open-meteo.com/v1/forecast",
-          params
-        );
-        const response = responses[0];
+      const responses = await fetchWeatherApi(
+        "https://api.open-meteo.com/v1/forecast",
+        params
+      );
+      const response = responses[0];
 
-        // Current weather
-        const current = response.current()!;
-        const currentTemp = Math.round(current.variables(0)!.value());
-        const currentWeatherCode = current.variables(1)!.value();
+      // Current weather
+      const current = response.current()!;
+      const currentTemp = Math.round(current.variables(0)!.value());
+      const currentWeatherCode = current.variables(1)!.value();
 
-        const weatherDataItem: WeatherData = {
-          city: location.name,
-          temperatureC: currentTemp,
-          condition: mapWeatherCodeToCondition(currentWeatherCode),
-          forecast: null, // Will be populated if includeForecast is true
-        };
+      const weatherDataItem: WeatherData = {
+        city: location.name,
+        temperatureC: currentTemp,
+        condition: mapWeatherCodeToCondition(currentWeatherCode),
+        forecast: null, // Will be populated if includeForecast is true
+      };
 
-        if (includeForecast) {
-          // Daily forecast
-          const daily = response.daily()!;
-          const dailyWeatherCode = daily.variables(0)!.valuesArray()!;
-          const dailyTempMax = daily.variables(1)!.valuesArray()!;
-          const dailyTempMin = daily.variables(2)!.valuesArray()!;
+      if (includeForecast) {
+        // Daily forecast
+        const daily = response.daily()!;
+        const dailyWeatherCode = daily.variables(0)!.valuesArray()!;
+        const dailyTempMax = daily.variables(1)!.valuesArray()!;
+        const dailyTempMin = daily.variables(2)!.valuesArray()!;
 
-          // Build forecast
-          const forecast: ForecastDay[] = [];
-          const today = new Date();
+        // Build forecast
+        const forecast: ForecastDay[] = [];
+        const today = new Date();
 
-          for (let i = 0; i < 5; i++) {
-            const forecastDate = new Date(today);
-            forecastDate.setDate(today.getDate() + i);
+        for (let i = 0; i < 5; i++) {
+          const forecastDate = new Date(today);
+          forecastDate.setDate(today.getDate() + i);
 
-            forecast.push({
-              day: this.getDayName(forecastDate),
-              high: Math.round(dailyTempMax[i]),
-              low: Math.round(dailyTempMin[i]),
-              condition: mapWeatherCodeToCondition(dailyWeatherCode[i]),
-            });
-          }
-
-          weatherDataItem.forecast = forecast;
+          forecast.push({
+            day: this.getDayName(forecastDate),
+            high: Math.round(dailyTempMax[i]),
+            low: Math.round(dailyTempMin[i]),
+            condition: mapWeatherCodeToCondition(dailyWeatherCode[i]),
+          });
         }
 
-        weatherData.push(weatherDataItem);
-      } catch (error) {
-        console.error(`Failed to fetch weather for ${location.name}:`, error);
-        // Fallback to hardcoded data if API fails
-        weatherData.push(
-          this.getFallbackWeatherData(location.name, includeForecast)
-        );
+        weatherDataItem.forecast = forecast;
       }
+
+      weatherData.push(weatherDataItem);
     }
 
     return weatherData;
   }
 
-  private getFallbackWeatherData(
-    city: string,
-    includeForecast: boolean = true
-  ): WeatherData {
-    const fallbackData: Record<string, WeatherData> = {
-      Seattle: {
-        city: "Seattle",
-        temperatureC: 12,
-        condition: "cloudy",
-        forecast: [
-          { day: "Mon", high: 14, low: 8, condition: "rainy" },
-          { day: "Tue", high: 16, low: 10, condition: "cloudy" },
-          { day: "Wed", high: 18, low: 12, condition: "clear" },
-          { day: "Thu", high: 15, low: 9, condition: "cloudy" },
-          { day: "Fri", high: 13, low: 7, condition: "rainy" },
-        ],
-      },
-      London: {
-        city: "London",
-        temperatureC: 9,
-        condition: "rainy",
-        forecast: [
-          { day: "Mon", high: 11, low: 6, condition: "rainy" },
-          { day: "Tue", high: 13, low: 8, condition: "cloudy" },
-          { day: "Wed", high: 15, low: 10, condition: "cloudy" },
-          { day: "Thu", high: 12, low: 7, condition: "rainy" },
-          { day: "Fri", high: 10, low: 5, condition: "rainy" },
-        ],
-      },
-      Shanghai: {
-        city: "Shanghai",
-        temperatureC: 24,
-        condition: "clear",
-        forecast: [
-          { day: "Mon", high: 26, low: 20, condition: "clear" },
-          { day: "Tue", high: 28, low: 22, condition: "clear" },
-          { day: "Wed", high: 25, low: 19, condition: "cloudy" },
-          { day: "Thu", high: 23, low: 17, condition: "rainy" },
-          { day: "Fri", high: 27, low: 21, condition: "clear" },
-        ],
-      },
-    };
-
-    const data = fallbackData[city] || fallbackData["Seattle"];
-    if (!includeForecast) {
-      return {
-        city: data.city,
-        temperatureC: data.temperatureC,
-        condition: data.condition,
-        forecast: null,
-      };
-    }
-    return data;
-  }
 }
 
 function mapWeatherCodeToCondition(weatherCode: number): WeatherCondition {
