@@ -11,6 +11,7 @@ export default defineConfig({
     tailwindcss(),
     nitro({
       ssr: false,
+      entryServer: "src/server/main.tsx",
     }),
   ],
   resolve: {
