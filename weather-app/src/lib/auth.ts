@@ -1,7 +1,13 @@
+export interface Organization {
+  id: string;
+  name: string;
+}
+
 export interface User {
   id: string;
   name: string;
   initials: string;
+  org: Organization;
 }
 
 export interface AuthState {

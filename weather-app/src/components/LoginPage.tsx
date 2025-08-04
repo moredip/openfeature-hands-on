@@ -7,28 +7,33 @@ const HARDCODED_USERS: User[] = [
   {
     id: "john-doe",
     name: "John Doe",
-    initials: "JD"
+    initials: "JD",
+    org: { id: "big-co", name: "Big Co" },
   },
   {
     id: "jane-smith",
     name: "Jane Smith",
-    initials: "JS"
+    initials: "JS",
+    org: { id: "startup-inc", name: "Startup Inc" },
   },
   {
     id: "bob-johnson",
     name: "Bob Johnson",
-    initials: "BJ"
+    initials: "BJ",
+    org: { id: "big-co", name: "Big Co" },
   },
   {
     id: "alice-wilson",
     name: "Alice Wilson",
-    initials: "AW"
+    initials: "AW",
+    org: { id: "tech-corp", name: "Tech Corp" },
   },
   {
     id: "mike-chen",
     name: "Mike Chen",
-    initials: "MC"
-  }
+    initials: "MC",
+    org: { id: "startup-inc", name: "Startup Inc" },
+  },
 ];
 
 export function LoginPage() {

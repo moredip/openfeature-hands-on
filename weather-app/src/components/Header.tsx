@@ -44,6 +44,7 @@ export function Header() {
             >
               <div className="px-3 py-2 border-b border-gray-700">
                 <p className="text-sm font-medium">{user?.name || "Unknown"}</p>
+                <p className="text-xs text-gray-400">{user?.org?.name || "No Organization"}</p>
               </div>
               <DropdownMenuItem 
                 className="text-red-400 hover:text-red-300 hover:bg-gray-700 focus:text-red-300 focus:bg-gray-700"
