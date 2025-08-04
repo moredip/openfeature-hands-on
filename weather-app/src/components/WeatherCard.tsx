@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Cloud,
   CloudSun,
@@ -29,7 +28,7 @@ interface WeatherCardProps {
   city: string;
   temperature: number;
   condition: WeatherCondition;
-  forecast: ForecastDay[];
+  forecast: ForecastDay[] | null;
 }
 
 const getWeatherIcon = (condition: WeatherCondition, size = "h-12 w-12") => {
@@ -74,6 +73,32 @@ const getWeatherText = (condition: WeatherCondition): string => {
   }
 };
 
+function WeatherForecast({ forecast }: { forecast: ForecastDay[] }) {
+  return (
+    <div className="mt-6 pt-4 border-t border-gray-100">
+      <h3 className="text-xs font-medium text-gray-500 mb-3">
+        5-DAY FORECAST
+      </h3>
+      <div className="grid grid-cols-5 gap-2">
+        {forecast.map((day, index) => (
+          <div key={index} className="flex flex-col items-center text-center">
+            <span className="text-xs text-gray-400 mb-1">{day.day}</span>
+            <div className="px-1 py-2 rounded-md bg-gray-50 flex flex-col items-center">
+              <div className="mb-1">
+                {getWeatherIcon(day.condition, "h-6 w-6")}
+              </div>
+              <div className="text-xs">
+                <span className="font-medium text-gray-900">{day.high}°</span>
+                <span className="text-gray-400 ml-1">{day.low}°</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function WeatherCard({
   city,
   temperature,
@@ -96,28 +121,7 @@ export function WeatherCard({
         <span>{conditionText}</span>
       </div>
 
-      {/* 5-day forecast section */}
-      <div className="mt-6 pt-4 border-t border-gray-100">
-        <h3 className="text-xs font-medium text-gray-500 mb-3">
-          5-DAY FORECAST
-        </h3>
-        <div className="grid grid-cols-5 gap-2">
-          {forecast.map((day, index) => (
-            <div key={index} className="flex flex-col items-center text-center">
-              <span className="text-xs text-gray-400 mb-1">{day.day}</span>
-              <div className="px-1 py-2 rounded-md bg-gray-50 flex flex-col items-center">
-                <div className="mb-1">
-                  {getWeatherIcon(day.condition, "h-6 w-6")}
-                </div>
-                <div className="text-xs">
-                  <span className="font-medium text-gray-900">{day.high}°</span>
-                  <span className="text-gray-400 ml-1">{day.low}°</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {forecast && <WeatherForecast forecast={forecast} />}
     </div>
   );
 }

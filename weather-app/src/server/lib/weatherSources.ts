@@ -20,7 +20,7 @@ interface WeatherData {
   city: string;
   temperatureC: number;
   condition: WeatherCondition;
-  forecast: ForecastDay[];
+  forecast: ForecastDay[] | null;
 }
 
 interface Location {
@@ -29,61 +29,33 @@ interface Location {
   longitude: number;
 }
 
+export const HARD_CODED_WEATHER_LOCATIONS: Location[] = [
+  { name: "Seattle", latitude: 47.6062, longitude: -122.3321 },
+  { name: "London", latitude: 51.5074, longitude: -0.1278 },
+  { name: "Shanghai", latitude: 31.2304, longitude: 121.4737 },
+];
+
 export class OpenMeteoWeatherSource {
-  private locations: Location[] = [
-    { name: "Seattle", latitude: 47.6062, longitude: -122.3321 },
-    { name: "London", latitude: 51.5074, longitude: -0.1278 },
-    { name: "Shanghai", latitude: 31.2304, longitude: 121.4737 },
-  ];
-
-  private mapWeatherCodeToCondition(weatherCode: number): WeatherCondition {
-    // Based on WMO weather codes (https://www.nodc.noaa.gov/archive/arc0021/0002199/1.1/data/0-data/HTML/WMO-CODE/WMO4677.HTM)
-
-    // Clear conditions (0-1: clear sky, no clouds)
-    if (weatherCode >= 0 && weatherCode <= 1) return "clear";
-
-    // Partially cloudy conditions (2-9: some cloud development)
-    if (weatherCode >= 2 && weatherCode <= 9) return "partially_cloudy";
-
-    // Thunderstorm conditions (90-99: thunderstorms with precipitation)
-    if (weatherCode >= 90 && weatherCode <= 99) return "thunder";
-
-    // Snow conditions (70-79: solid precipitation)
-    if (weatherCode >= 70 && weatherCode <= 79) return "snow";
-
-    // Fog conditions (40-49: fog and visibility reduction)
-    if (weatherCode >= 40 && weatherCode <= 49) return "fog";
-
-    // Rain conditions (50-69: drizzle and rain, 80-89: showers)
-    if (weatherCode >= 50 && weatherCode <= 69) return "rainy";
-    if (weatherCode >= 80 && weatherCode <= 89) return "rainy";
-
-    // Past precipitation (20-29)
-    if (weatherCode >= 20 && weatherCode <= 29) return "rainy";
-
-    // Dust, sand, and other atmospheric phenomena (30-39, 10-19)
-    if (weatherCode >= 30 && weatherCode <= 39) return "cloudy"; // Dust, sand
-    if (weatherCode >= 10 && weatherCode <= 19) return "cloudy"; // Atmospheric phenomena
-
-    return "cloudy"; // default fallback
-  }
-
   private getDayName(date: Date): string {
     return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()];
   }
 
-  async getWeatherForAllLocations(): Promise<WeatherData[]> {
+  async getWeatherForAllLocations(
+    includeForecast: boolean
+  ): Promise<WeatherData[]> {
     const weatherData: WeatherData[] = [];
 
-    for (const location of this.locations) {
+    for (const location of HARD_CODED_WEATHER_LOCATIONS) {
       try {
         const params = {
           latitude: location.latitude,
           longitude: location.longitude,
           current: ["temperature_2m", "weather_code"],
-          daily: ["weather_code", "temperature_2m_max", "temperature_2m_min"],
+          ...(includeForecast && {
+            daily: ["weather_code", "temperature_2m_max", "temperature_2m_min"],
+            forecast_days: 5,
+          }),
           timezone: "auto",
-          forecast_days: 5,
         };
 
         const responses = await fetchWeatherApi(
@@ -97,45 +69,56 @@ export class OpenMeteoWeatherSource {
         const currentTemp = Math.round(current.variables(0)!.value());
         const currentWeatherCode = current.variables(1)!.value();
 
-        // Daily forecast
-        const daily = response.daily()!;
-        const dailyWeatherCode = daily.variables(0)!.valuesArray()!;
-        const dailyTempMax = daily.variables(1)!.valuesArray()!;
-        const dailyTempMin = daily.variables(2)!.valuesArray()!;
-
-        // Build forecast
-        const forecast: ForecastDay[] = [];
-        const today = new Date();
-
-        for (let i = 0; i < 5; i++) {
-          const forecastDate = new Date(today);
-          forecastDate.setDate(today.getDate() + i);
-
-          forecast.push({
-            day: this.getDayName(forecastDate),
-            high: Math.round(dailyTempMax[i]),
-            low: Math.round(dailyTempMin[i]),
-            condition: this.mapWeatherCodeToCondition(dailyWeatherCode[i]),
-          });
-        }
-
-        weatherData.push({
+        const weatherDataItem: WeatherData = {
           city: location.name,
           temperatureC: currentTemp,
-          condition: this.mapWeatherCodeToCondition(currentWeatherCode),
-          forecast,
-        });
+          condition: mapWeatherCodeToCondition(currentWeatherCode),
+          forecast: null, // Will be populated if includeForecast is true
+        };
+
+        if (includeForecast) {
+          // Daily forecast
+          const daily = response.daily()!;
+          const dailyWeatherCode = daily.variables(0)!.valuesArray()!;
+          const dailyTempMax = daily.variables(1)!.valuesArray()!;
+          const dailyTempMin = daily.variables(2)!.valuesArray()!;
+
+          // Build forecast
+          const forecast: ForecastDay[] = [];
+          const today = new Date();
+
+          for (let i = 0; i < 5; i++) {
+            const forecastDate = new Date(today);
+            forecastDate.setDate(today.getDate() + i);
+
+            forecast.push({
+              day: this.getDayName(forecastDate),
+              high: Math.round(dailyTempMax[i]),
+              low: Math.round(dailyTempMin[i]),
+              condition: mapWeatherCodeToCondition(dailyWeatherCode[i]),
+            });
+          }
+
+          weatherDataItem.forecast = forecast;
+        }
+
+        weatherData.push(weatherDataItem);
       } catch (error) {
         console.error(`Failed to fetch weather for ${location.name}:`, error);
         // Fallback to hardcoded data if API fails
-        weatherData.push(this.getFallbackWeatherData(location.name));
+        weatherData.push(
+          this.getFallbackWeatherData(location.name, includeForecast)
+        );
       }
     }
 
     return weatherData;
   }
 
-  private getFallbackWeatherData(city: string): WeatherData {
+  private getFallbackWeatherData(
+    city: string,
+    includeForecast: boolean = true
+  ): WeatherData {
     const fallbackData: Record<string, WeatherData> = {
       Seattle: {
         city: "Seattle",
@@ -175,6 +158,47 @@ export class OpenMeteoWeatherSource {
       },
     };
 
-    return fallbackData[city] || fallbackData["Seattle"];
+    const data = fallbackData[city] || fallbackData["Seattle"];
+    if (!includeForecast) {
+      return {
+        city: data.city,
+        temperatureC: data.temperatureC,
+        condition: data.condition,
+        forecast: null,
+      };
+    }
+    return data;
   }
+}
+
+function mapWeatherCodeToCondition(weatherCode: number): WeatherCondition {
+  // Based on WMO weather codes (https://www.nodc.noaa.gov/archive/arc0021/0002199/1.1/data/0-data/HTML/WMO-CODE/WMO4677.HTM)
+
+  // Clear conditions (0-1: clear sky, no clouds)
+  if (weatherCode >= 0 && weatherCode <= 1) return "clear";
+
+  // Partially cloudy conditions (2-9: some cloud development)
+  if (weatherCode >= 2 && weatherCode <= 9) return "partially_cloudy";
+
+  // Thunderstorm conditions (90-99: thunderstorms with precipitation)
+  if (weatherCode >= 90 && weatherCode <= 99) return "thunder";
+
+  // Snow conditions (70-79: solid precipitation)
+  if (weatherCode >= 70 && weatherCode <= 79) return "snow";
+
+  // Fog conditions (40-49: fog and visibility reduction)
+  if (weatherCode >= 40 && weatherCode <= 49) return "fog";
+
+  // Rain conditions (50-69: drizzle and rain, 80-89: showers)
+  if (weatherCode >= 50 && weatherCode <= 69) return "rainy";
+  if (weatherCode >= 80 && weatherCode <= 89) return "rainy";
+
+  // Past precipitation (20-29)
+  if (weatherCode >= 20 && weatherCode <= 29) return "rainy";
+
+  // Dust, sand, and other atmospheric phenomena (30-39, 10-19)
+  if (weatherCode >= 30 && weatherCode <= 39) return "cloudy"; // Dust, sand
+  if (weatherCode >= 10 && weatherCode <= 19) return "cloudy"; // Atmospheric phenomena
+
+  return "cloudy"; // default fallback
 }
