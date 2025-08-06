@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:openfeature.dev)",
+      "Bash(cat:*)",
+      "WebFetch(domain:github.com)"
+    ],
+    "deny": []
+  }
+}

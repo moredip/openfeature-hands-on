@@ -81,6 +81,7 @@ services:
     image: docker.flipt.io/flipt/flipt:latest
     environment:
       FLIPT_SERVER_HTTP_PORT: 8002
+      FLIPT_CORS_ENABLED: true
     ports:
       - 8002:8002
       - 9000:9000

@@ -5,7 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/providers/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface HeaderProps {
