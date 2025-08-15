@@ -76,9 +76,7 @@ const getWeatherText = (condition: WeatherCondition): string => {
 function WeatherForecast({ forecast }: { forecast: ForecastDay[] }) {
   return (
     <div className="mt-6 pt-4 border-t border-gray-100">
-      <h3 className="text-xs font-medium text-gray-500 mb-3">
-        5-DAY FORECAST
-      </h3>
+      <h3 className="text-xs font-medium text-gray-500 mb-3">5-DAY FORECAST</h3>
       <div className="grid grid-cols-5 gap-2">
         {forecast.map((day, index) => (
           <div key={index} className="flex flex-col items-center text-center">
@@ -121,7 +119,7 @@ export function WeatherCard({
         <span>{conditionText}</span>
       </div>
 
-      {forecast && <WeatherForecast forecast={forecast} />}
+      {forecast ? <WeatherForecast forecast={forecast} /> : null}
     </div>
   );
 }
