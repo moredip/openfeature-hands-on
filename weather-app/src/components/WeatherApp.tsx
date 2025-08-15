@@ -1,16 +1,9 @@
 import { WeatherCard } from "@/components/WeatherCard";
 import { Header } from "@/components/Header";
 import { useCurrentWeather } from "@/lib/apiClient";
-import { useFlag } from "@openfeature/react-sdk";
 
 export function WeatherApp() {
-  const { value: includeForecast } = useFlag("include-forecast", false);
-  console.log(
-    'return value from useFlag("include-forecast"):',
-    includeForecast
-  );
-  const { data: weatherResponse, isLoading } =
-    useCurrentWeather(includeForecast);
+  const { data: weatherResponse, isLoading } = useCurrentWeather();
 
   if (isLoading) {
     return (
